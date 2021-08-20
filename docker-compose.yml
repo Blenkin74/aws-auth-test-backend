@@ -1,0 +1,55 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: blenka/awsauthtestbackend
+    container_name: app
+    tty: true
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: auth_test_backend_db_pwd
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+    volumes:
+      - ./:/var/www
+      - ./config/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./.docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./.docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile_Nginx
+    image: blenka/nginx
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./config/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      MYSQL_DATABASE: awsauthtestbackenddb
+      MYSQL_ROOT_PASSWORD: auth_test_backend_db_pwd
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+
+
+volumes:
+  dbdata:
+    driver: local

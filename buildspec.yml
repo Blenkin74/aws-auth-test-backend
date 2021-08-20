@@ -1,0 +1,47 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+#      - php -r "if (hash_file('sha384', 'composer-setup.php') === 'e0012edf3e80b6978849f5eff0d4b4e4c79ff1609dd1e613307e16318854d24ae64f26d17af3ef0bf7cfb710ca74755a') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+      - php composer-setup.php
+      - php -r "unlink('composer-setup.php');"
+      - mv composer.phar /usr/local/bin/composer
+  pre_build:
+    commands:
+      - echo Composer downloading packages
+      - composer install --no-progress --no-suggest
+      - echo node modules are Installing
+      - npm install && npm run dev
+      - cp .env.example .env
+      - php artisan key:generate
+      - ./vendor/bin/phpunit tests/Unit
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - echo $AWS_DEFAULT_REGION
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI_LARAVEL=486414506700.dkr.ecr.eu-west-2.amazonaws.com/laravelapp
+      - REPOSITORY_URI_NGINX=486414506700.dkr.ecr.eu-west-2.amazonaws.com/nginx
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Installing composer deps
+      #- docker-compose up
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI_LARAVEL:latest .
+      - docker tag $REPOSITORY_URI_LARAVEL:latest $REPOSITORY_URI_LARAVEL:$IMAGE_TAG
+      - docker build -t $REPOSITORY_URI_NGINX:latest -f Dockerfile_Nginx .
+      - docker tag $REPOSITORY_URI_NGINX:latest $REPOSITORY_URI_NGINX:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - docker push $REPOSITORY_URI_LARAVEL:latest
+      - docker push $REPOSITORY_URI_LARAVEL:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_NGINX:latest
+      - docker push $REPOSITORY_URI_NGINX:$IMAGE_TAG
+      - printf '[{"name":"app","imageUri":"%s"},{"name":"nginx","imageUri":"%s"}]' $REPOSITORY_URI_LARAVEL:$IMAGE_TAG $REPOSITORY_URI_NGINX:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
