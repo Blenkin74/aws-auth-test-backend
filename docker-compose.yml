@@ -8,6 +8,8 @@ services:
     container_name: app
     tty: true
     restart: unless-stopped
+    depends_on:
+      - db
     environment:
       DB_HOST: db
       DB_PASSWORD: auth_test_backend_db_pwd
