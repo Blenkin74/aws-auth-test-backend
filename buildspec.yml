@@ -17,6 +17,8 @@ phases:
       - cp .env.example .env
       - php artisan key:generate
       - ./vendor/bin/phpunit tests/Unit
+      - echo Logging in to DockerHub...
+      - docker login -u blenka -p MyDogIsCalledTina!!
       - echo Logging in to Amazon ECR...
       - aws --version
       - echo $AWS_DEFAULT_REGION
