@@ -22,6 +22,8 @@ Route::prefix('admin')->group(function() {
     Route::middleware(['auth:sanctum','scope.admin'])->group(function() {
         Route::get('user', [AuthController::class, 'user']);
         Route::post('logout', [AuthController::class, 'logout']);
+        Route::put('users/info', [AuthController::class, 'updateInfo']);
+        Route::put('users/password', [AuthController::class, 'updatePassword']);
     });
 });
 
