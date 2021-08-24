@@ -27,7 +27,7 @@ class UserRegisterRequest extends FormRequest
             'first_name' => 'required',
             'last_name' => 'required',
             'email' => 'email|unique:users,email',
-            'username' => 'required|unique:users,username',
+            'username' => 'required_without:email|unique:users,username|regex:/^[a-zA-Z0-9-_]+$/',
             'password' => 'required',
             'password_confirm' => 'required|same:password'
         ];
