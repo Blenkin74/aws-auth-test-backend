@@ -25,7 +25,20 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        if (! \Auth::attempt($request->only('email', 'password'))) {
+        $this->validate($request, [
+           'login' => 'required',
+           'password' => 'required'
+        ]);
+
+        $login_type = filter_var($request->input('login'), FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'username';
+
+        $request->merge([
+            $login_type => $request->input('login')
+        ]);
+
+        if (! \Auth::attempt($request->only([$login_type, 'password']))) {
             return response([
                 'error' => 'Invalid credentials'
             ], Response::HTTP_UNAUTHORIZED);
