@@ -1,5 +1,8 @@
 version: 0.2
-
+env:
+  parameter-store:
+    DOCKER_USERNAME: DOCKER_USERNAME
+    DOCKER_PASSWD: DOCKER_PASSWD
 phases:
   install:
     commands:
@@ -18,7 +21,7 @@ phases:
       - php artisan key:generate
       - ./vendor/bin/phpunit tests/Unit
       - echo Logging in to DockerHub...
-      - docker login -u blenka -p MyDogIsCalledTina!!
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWD
       - echo Logging in to Amazon ECR...
       - aws --version
       - echo $AWS_DEFAULT_REGION
