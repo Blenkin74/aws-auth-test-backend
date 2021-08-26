@@ -24,7 +24,8 @@ class UserUpdateInfoRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'email'
+            'email' => 'email:rfc,dns|nullable',
+            'username' => 'required_without:email|regex:/^[a-zA-Z0-9-_]+$/|nullable'
         ];
     }
 }
