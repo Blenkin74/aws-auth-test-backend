@@ -100,20 +100,24 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if (!$this->safeUpdateFieldForUser('email', $request->input('email'), $user->id)) {
-            return response([
-                "errors" => [
-                    "email" => "Provided email is already used by another user"
-                ]
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if ($request->input('email') !== $user->email) {
+            if (!$this->safeUpdateFieldForUser('email', $request->input('email'), $user->id)) {
+                return response([
+                    "errors" => [
+                        "email" => "Provided email is already used by another user"
+                    ]
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }
 
-        if (!$this->safeUpdateFieldForUser('username', $request->input('username'), $user->id)) {
-            return response([
-                "errors" => [
-                    "username" => "Provided username is already used by another user"
-                ]
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        if ($request->input('username') !== $user->username) {
+            if (!$this->safeUpdateFieldForUser('username', $request->input('username'), $user->id)) {
+                return response([
+                    "errors" => [
+                        "username" => "Provided username is already used by another user"
+                    ]
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }
 
         $user->update($request->only('first_name', 'last_name', 'email', 'username'));
