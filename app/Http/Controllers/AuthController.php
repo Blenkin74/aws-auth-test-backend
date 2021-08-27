@@ -143,6 +143,10 @@ class AuthController extends Controller
         return false;
     }
 
+    /**
+     * @param UserUpdatePasswordRequest $request
+     * @return \Illuminate\Http\Response|Application|ResponseFactory
+     */
     public function updatePassword(UserUpdatePasswordRequest $request): \Illuminate\Http\Response|Application|ResponseFactory
     {
         $user = $request->user();
