@@ -26,8 +26,8 @@ class UserRegisterRequest extends FormRequest
         return [
             'first_name' => 'required',
             'last_name' => 'required',
-            'email' => 'email:rfc,dns|unique:users,email',
-            'username' => 'required_without:email|unique:users,username|regex:/^[a-zA-Z0-9-_]+$/',
+            'email' => 'nullable|email:rfc,dns|unique:users,email',
+            'username' => 'nullable|required_without:email|unique:users,username|regex:/^[a-zA-Z0-9-_]+$/',
             'password' => 'required',
             'password_confirm' => 'required|same:password'
         ];
